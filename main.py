@@ -13,9 +13,11 @@ def is_bitlink(token: str, link: str) -> bool:
     response = requests.get(url, headers=headers)
     return response.ok
 
+
 def remove_protocol_from_bitlink(link: str) -> str:
     parsed_link = urlparse(link)
-    return parsed_link.netloc + parsed_link.path
+    return f"{parsed_link.netloc}{parsed_link.path}"
+
 
 def shorten_link(token: str, link: str) -> str:
     url = "https://api-ssl.bitly.com/v4/bitlinks"
@@ -26,15 +28,17 @@ def shorten_link(token: str, link: str) -> str:
     bitlink = response.json().get("id")
     return bitlink
 
+
 def count_clicks(token: str, link: str) -> str:
     link = remove_protocol_from_bitlink(link)
-    url = "https://api-ssl.bitly.com/v4/bitlinks/{}/clicks/summary".format(link)
+    url = f"https://api-ssl.bitly.com/v4/bitlinks/{link}/clicks/summary"
     params = {"unit": "month", "units": -1}
     headers = {"Authorization": "Bearer {}".format(token)}
     response = requests.get(url, params=params, headers=headers)
     response.raise_for_status()
-    links_number = response.json().get("total_clicks")
-    return links_number
+    clicks_number = response.json().get("total_clicks")
+    return clicks_number
+
 
 def main():
     try:
@@ -52,6 +56,7 @@ def main():
         raise TypeError("Нерабочая ссылка")
     except KeyError:
         raise KeyError("Не найден BITLY_TOKEN в переменных окружения")
+
 
 if __name__ == "__main__":
     print(main())
